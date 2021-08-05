@@ -5,16 +5,16 @@ import json
 import socket
 import time
 from common.variables import ACTION, PRESENCE, TIME, USER, ACCOUNT_NAME, \
-    RESPONSE, ERROR, DEFAULT_IP_ADDRESS, DEFAULT_PORT
+    RESPONSE, ERROR, DEFAULT_IP_ADDRESS, DEFAULT_PORT, HELLO
 from common.utils import get_message, send_message
 
 
 def create_presence(account_name='Guest'):
-    '''
+    """
     Функция генерирует запрос о присутствии клиента
     :param account_name:
     :return:
-    '''
+    """
     # {'action': 'presence', 'time': 1573760672.167031, 'user': {'account_name': 'Guest'}}
     out = {
         ACTION: PRESENCE,
@@ -27,20 +27,20 @@ def create_presence(account_name='Guest'):
 
 
 def process_ans(message):
-    '''
+    """
     Функция разбирает ответ сервера
     :param message:
     :return:
-    '''
-    if RESPONSE in message:
+    """
+    if RESPONSE and HELLO in message:
         if message[RESPONSE] == 200:
-            return '200 : OK'
+            return message[HELLO], '200 : OK'
         return f'400 : {message[ERROR]}'
     raise ValueError
 
 
 def main():
-    '''Загружаем параметы коммандной строки'''
+    """Загружаем параметы коммандной строки"""
     # client.py 192.168.1.2 8079
     try:
         server_address = sys.argv[1]
