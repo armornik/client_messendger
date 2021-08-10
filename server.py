@@ -1,11 +1,19 @@
 """Программа-сервер"""
 
+import argparse
+import logging
+import json
 import socket
 import sys
-import json
+
+import progect_logs.configs_logs.config_server_log
+from errors import IncorrectDataRecivedError
 from common.variables import ACTION, ACCOUNT_NAME, RESPONSE, MAX_CONNECTIONS, \
     PRESENCE, TIME, USER, ERROR, DEFAULT_PORT, HELLO
 from common.utils import get_message, send_message
+
+# Инициализация логирования сервера.
+SERVER_LOGGER = logging.getLogger('server')
 
 
 def process_client_message(message):
@@ -26,42 +34,35 @@ def process_client_message(message):
     }
 
 
-def main():
+def create_arg_parser():
     """
-    Загрузка параметров командной строки, если нет параметров, то задаём значения по умоланию.
-    Сначала обрабатываем порт:
-    server.py -p 8079 -a 192.168.1.2
+    Парсер аргументов коммандной строки
     :return:
     """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', default=DEFAULT_PORT, type=int, nargs='?')
+    parser.add_argument('-a', default='', nargs='?')
+    return parser
 
-    try:
-        if '-p' in sys.argv:
-            listen_port = int(sys.argv[sys.argv.index('-p') + 1])
-        else:
-            listen_port = DEFAULT_PORT
-        if listen_port < 1024 or listen_port > 65535:
-            raise ValueError
-    except IndexError:
-        print('После параметра -\'p\' необходимо указать номер порта.')
+
+def main():
+    """
+    Загрузка параметров командной строки, если нет параметров, то задаём значения по умоланию
+    :return:
+    """
+    parser = create_arg_parser()
+    namespace = parser.parse_args(sys.argv[1:])
+    listen_address = namespace.a
+    listen_port = namespace.p
+
+    # проверка получения корретного номера порта для работы сервера.
+    if not 1023 < listen_port < 65536:
+        SERVER_LOGGER.critical(f'Попытка запуска сервера с указанием неподходящего порта '
+                               f'{listen_port}. Допустимы адреса с 1024 до 65535.')
         sys.exit(1)
-    except ValueError:
-        print(
-            'В качастве порта может быть указано только число в диапазоне от 1024 до 65535.')
-        sys.exit(1)
-
-    # Затем загружаем какой адрес слушать
-
-    try:
-        if '-a' in sys.argv:
-            listen_address = sys.argv[sys.argv.index('-a') + 1]
-        else:
-            listen_address = ''
-
-    except IndexError:
-        print(
-            'После параметра \'a\'- необходимо указать адрес, который будет слушать сервер.')
-        sys.exit(1)
-
+    SERVER_LOGGER.info(f'Запущен сервер, порт для подключений: {listen_port}, '
+                       f'адрес с которого принимаются подключения: {listen_address}. '
+                       f'Если адрес не указан, принимаются соединения с любых адресов.')
     # Готовим сокет
 
     transport = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -73,15 +74,22 @@ def main():
 
     while True:
         client, client_address = transport.accept()
+        SERVER_LOGGER.info(f'Установлено соедение с ПК {client_address}')
         try:
             message_from_cient = get_message(client)
-            print(message_from_cient)
-            # {'action': 'presence', 'time': 1573760672.167031, 'user': {'account_name': 'Guest'}}
+            SERVER_LOGGER.debug(f'Получено сообщение {message_from_cient}')
             response = process_client_message(message_from_cient)
+            SERVER_LOGGER.info(f'Cформирован ответ клиенту {response}')
             send_message(client, response)
+            SERVER_LOGGER.debug(f'Соединение с клиентом {client_address} закрывается.')
             client.close()
-        except (ValueError, json.JSONDecodeError):
-            print('Принято некорретное сообщение от клиента.')
+        except json.JSONDecodeError:
+            SERVER_LOGGER.error(f'Не удалось декодировать JSON строку, полученную от '
+                                f'клиента {client_address}. Соединение закрывается.')
+            client.close()
+        except IncorrectDataRecivedError:
+            SERVER_LOGGER.error(f'От клиента {client_address} приняты некорректные данные. '
+                                f'Соединение закрывается.')
             client.close()
 
 
