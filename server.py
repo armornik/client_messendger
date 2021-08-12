@@ -6,7 +6,8 @@ import json
 import socket
 import sys
 
-import progect_logs.configs_logs.config_server_log
+# import progect_logs.configs_logs.config_server_log
+from decorators import log, Log
 from errors import IncorrectDataRecivedError
 from common.variables import ACTION, ACCOUNT_NAME, RESPONSE, MAX_CONNECTIONS, \
     PRESENCE, TIME, USER, ERROR, DEFAULT_PORT, HELLO
@@ -16,6 +17,7 @@ from common.utils import get_message, send_message
 SERVER_LOGGER = logging.getLogger('server')
 
 
+@log
 def process_client_message(message):
     """
     Обработчик сообщений от клиентов, принимает словарь -
@@ -34,6 +36,7 @@ def process_client_message(message):
     }
 
 
+@Log()
 def create_arg_parser():
     """
     Парсер аргументов коммандной строки
