@@ -16,13 +16,16 @@ ENCODING = 'utf-8'
 LOGGING_LEVEL = logging.DEBUG
 
 # Прококол JIM основные ключи:
+ACCOUNT_NAME = 'account_name'
 ACTION = 'action'
+SENDER = 'sender'
 TIME = 'time'
 USER = 'user'
-ACCOUNT_NAME = 'account_name'
 HELLO = 'Hello'
 
 # Прочие ключи, используемые в протоколе
-PRESENCE = 'presence'
-RESPONSE = 'response'
 ERROR = 'error'
+PRESENCE = 'presence'
+MESSAGE = 'message'
+MESSAGE_TEXT = 'mess_text'
+RESPONSE = 'response'
