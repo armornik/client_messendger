@@ -15,14 +15,19 @@ while True:
         # Запускаем сервер по команде
         PROCESS.append(subprocess.Popen('python server.py',
                                         creationflags=subprocess.CREATE_NEW_CONSOLE))
-        # Создаём двух клиентов, которые посылают сообщение -m - режим mode
-        for i in range(2):
-            PROCESS.append(subprocess.Popen('python client.py -m send',
-                                            creationflags=subprocess.CREATE_NEW_CONSOLE))
-        # Создаём 5 клиентов, которые получают сообщения
-        for i in range(5):
-            PROCESS.append(subprocess.Popen('python client.py -m listen',
-                                            creationflags=subprocess.CREATE_NEW_CONSOLE))
+        # Создаём клиентов
+
+        PROCESS.append(subprocess.Popen('python client.py -n client_1',
+                                        creationflags=subprocess.CREATE_NEW_CONSOLE))
+
+        PROCESS.append(subprocess.Popen('python client.py -n client_2',
+                                        creationflags=subprocess.CREATE_NEW_CONSOLE))
+        PROCESS.append(subprocess.Popen('python client.py -n client_3',
+                                        creationflags=subprocess.CREATE_NEW_CONSOLE))
+        PROCESS.append(subprocess.Popen('python client.py -n client_4',
+                                        creationflags=subprocess.CREATE_NEW_CONSOLE))
+        PROCESS.append(subprocess.Popen('python client.py -n client_5',
+                                        creationflags=subprocess.CREATE_NEW_CONSOLE))
     # Команда для закрытия окон
     elif ACTION == 'x':
         while PROCESS:

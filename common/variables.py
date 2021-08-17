@@ -18,14 +18,22 @@ LOGGING_LEVEL = logging.DEBUG
 # Прококол JIM основные ключи:
 ACCOUNT_NAME = 'account_name'
 ACTION = 'action'
+DESTINATION = 'to'
+HELLO = 'Hello'
 SENDER = 'sender'
 TIME = 'time'
 USER = 'user'
-HELLO = 'Hello'
+
 
 # Прочие ключи, используемые в протоколе
 ERROR = 'error'
+EXIT = 'exit'
 PRESENCE = 'presence'
 MESSAGE = 'message'
 MESSAGE_TEXT = 'mess_text'
 RESPONSE = 'response'
+RESPONSE_200 = {RESPONSE: 200}
+RESPONSE_400 = {
+    RESPONSE: 400,
+    ERROR: None
+}
